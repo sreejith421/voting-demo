@@ -1,0 +1,52 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+
+  "provisioners": [
+    {
+        "type": "shell",
+        "execute_command": "echo 'ubuntu' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+        "inline": [
+            "sleep 30",
+            "apt-add-repository ppa:ansible/ansible -y",
+            "/usr/bin/apt-get update",
+            "/usr/bin/apt-get -y install ansible"
+        ]
+    },
+    {
+      "type": "file",
+      "source": "./static_site.cfg",
+      "destination": "/home/ubuntu/"
+    },
+    {
+      "type": "file",
+      "source": "./static-site-src",
+      "destination": "/home/ubuntu/"
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "ansible-playbook.yml"
+    }
+  ],
+
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-west-2",
+    "source_ami": "ami-08692d171e3cf02d6",
+    "instance_type": "t2.micro",
+    "ssh_username": "ubuntu",
+    "ami_name": "people10-packer-ami {{timestamp}}",
+    "tags": {
+      "Name": "People10-demo-ami"},
+    "launch_block_device_mappings": [{
+      "device_name": "/dev/sda1",
+      "volume_size": 8,
+      "volume_type": "gp2",
+      "delete_on_termination": true
+    }]
+  }]
+}

@@ -1,0 +1,30 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+
+  "provisioners": [
+    {
+      "type": "ansible-local",
+      "playbook_file": "packer/ansible-playbook.yml"
+    }
+  ],
+
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-west-2",
+    "source_ami": "ami-08692d171e3cf02d6",
+    "instance_type": "t2.micro",
+    "ssh_username": "ubuntu",
+    "ami_name": "people10-packer-ami {{timestamp}}",
+    "launch_block_device_mappings": [{
+      "device_name": "/dev/sda1",
+      "volume_size": 8,
+      "volume_type": "gp2",
+      "delete_on_termination": true
+    }]
+  }]
+}
